@@ -1,20 +1,24 @@
 import requests
 import json
 import os
+import sys
 
 class Api:
-  def __init__(self):
+  def __init__(self, vars={}):
     self.session = None
-    self.endpoint = f"https://olimpiadi-scientifiche.it/graphql/"
+    self.endpoint = "https://olimpiadi-scientifiche.it/graphql/"
     self.headers = {}
 
     self.EMAIL = os.environ.get("OLI_EMAIL", "emanuele.paolini@unipi.it")
     self.PASSWORD = os.environ.get("OLI_PASSWORD")
+    self.vars = vars
 
   def query(self, query):
-    # print("Making query", query)
+    for key in self.vars:
+      query = query.replace("${" + key + "}", self.vars[key])
+#    print("Making query", query)
     if not self.session:
-      print("Creating session")
+      print("Creating session", file=sys.stderr)
       self.session = requests.Session()
       r = self.session.post(self.endpoint)
       csrf_token = r.cookies.get_dict().get('csrftoken')
@@ -24,12 +28,12 @@ class Api:
     if csrf_token:
       self.headers.update({"X-CsrfToken": csrf_token})
     if r.status_code != 200:
-        print(json.dumps(r.json(), indent=2))
-        raise Exception(f"Query failed to run with a {r.status_code}.", r.status_code)
+        print(json.dumps(r.json(), indent=2), file=sys.stderr)
+        raise Exception("Query failed to run with a {r.status_code}.", r.status_code)
     return r.json()
 
   def login(self):
-    print("Logging in")
+    print("Logging in", file=sys.stderr)
     return self.query("""mutation {
       users{
         login(email: "$EMAIL", password: "$PASSWORD"){
