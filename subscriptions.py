@@ -3,9 +3,10 @@ import os
 
 from api import Api, sanitize
 
-api=Api({"EDITION_ID":"olimat24"})
+api=Api()
 api.login()
 
+# grazie a Flavio
 query = """query Prova {
   olympiads{
     edition(id:"olimat25") {
@@ -36,7 +37,7 @@ query = """query Prova {
 }"""
 
 cursor = ""
-print("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(
+print("\t".join([
     "Status", 
     "IsValid", 
     "InvalidatedAt", 
@@ -44,7 +45,7 @@ print("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(
     "ContactID", 
     "FullName",
     "IsActive", 
-    "Email"))
+    "Email"]))
 while True:
     r = api.query(query.replace("$CURSOR", cursor))
     subscriptions = r["data"]["olympiads"]["edition"]["subscriptions"]

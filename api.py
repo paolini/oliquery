@@ -14,9 +14,11 @@ class Api:
     self.endpoint = "https://olimpiadi-scientifiche.it/graphql/"
     self.headers = {}
 
-    self.EMAIL = os.environ.get("OLI_EMAIL", "emanuele.paolini@unipi.it")
+    self.EMAIL = os.environ.get("OLI_EMAIL")
     self.PASSWORD = os.environ.get("OLI_PASSWORD")
     self.vars = vars
+    if not self.vars.get("EDITION"):
+      self.vars["EDITION"] = os.environ.get("OLI_EDITION", "olimat25")
 
   def query(self, query):
     for key in self.vars:
@@ -39,7 +41,11 @@ class Api:
 
   def login(self):
     print("Logging in", file=sys.stderr)
-    return self.query("""mutation {
+    if not self.EMAIL:
+      raise Exception("Email non specificata!\nPer risolvere:\nexport OLI_EMAIL=my-email")
+    if not self.PASSWORD:
+      raise Exception("Password non specificata!\nPer risolvere:\nexport OLI_PASSWORD=my-secret-password")
+    r = self.query("""mutation {
       users{
         login(email: "$EMAIL", password: "$PASSWORD"){
           __typename
@@ -57,6 +63,11 @@ class Api:
         }
       }
     }""".replace("$EMAIL", self.EMAIL).replace("$PASSWORD", self.PASSWORD))
+    login = r["data"]["users"]["login"]
+    typename = login["__typename"]
+    if typename == "OperationInfo":
+        raise Exception("OperationInfo: " + ", ".join([x["message"] for x in login["messages"]]))
+    return r
   
   def me(self): 
     return self.query(""" query {
