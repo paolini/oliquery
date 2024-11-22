@@ -3,6 +3,11 @@ import json
 import os
 import sys
 
+def sanitize(s):
+    if not hasattr(s, "replace"):
+        s = str(s)
+    return s.replace("\n", " ").replace("\r", " ").replace("\t", " ")
+
 class Api:
   def __init__(self, vars={}):
     self.session = None
