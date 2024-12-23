@@ -17,10 +17,15 @@ python api.py
 
 Elenco CDRD:
 ```
-python CDRD.py
+python cdrd.py
 ```
 
 Elenco scuole:
 ```
 python schools.py
+```
+
+Elenco distretti:
+```
+python zones.py
 ```

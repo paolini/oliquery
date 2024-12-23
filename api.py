@@ -3,10 +3,23 @@ import json
 import os
 import sys
 
+def dotted_field(d,field):
+  for f in field.split('.'):
+    d = d[f]
+  return d
+
 def sanitize(s):
+    if type(s) == bool:
+       return "1" if s else "0"
     if not hasattr(s, "replace"):
         s = str(s)
     return s.replace("\n", " ").replace("\r", " ").replace("\t", " ")
+
+def tsv_row(row, fields):
+  return "\t".join([sanitize(dotted_field(row,field)) for field in fields])
+
+def tsv_header(fields):
+  return "\t".join(fields)
 
 class Api:
   def __init__(self, vars={}):

@@ -1,6 +1,3 @@
-import json
-import os
-
 from api import Api, sanitize
 
 query3 = """query {
@@ -63,8 +60,8 @@ if True:
   zones = CDRD["data"]["zones"]["zones"]
   print("\t".join(["zona", "CD/RD", "nome", "cognome", "email", "telefono", "scuola", "indirizzo", "CAP", "città"]))
   for z in zones:
-    riga = []
     for a in z["admins"]:
+      riga = [] 
       riga.append(sanitize(z["name"]))
       riga.append("CD" if a["isPrimary"] else "RD")
       user = a["user"]
