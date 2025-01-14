@@ -6,7 +6,7 @@ cd oliquery
 
 Prima di iniziare servono le credenziali:
 ```
-export OLI_USERNAME=my-username
+export OLI_EMAIL=my-username
 export OLI_PASSWORD=my-secret-password
 ```
 
