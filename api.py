@@ -5,7 +5,9 @@ import sys
 
 def dotted_field(d,field):
   for f in field.split('.'):
-    d = d[f]
+    if not d:
+      return None
+    d = d.get(f)
   return d
 
 def sanitize(s):
@@ -33,9 +35,13 @@ class Api:
     if not self.vars.get("EDITION"):
       self.vars["EDITION"] = os.environ.get("OLI_EDITION", "olimat25")
 
-  def query(self, query):
-    for key in self.vars:
-      query = query.replace("${" + key + "}", self.vars[key])
+  def query(self, query, vars={}):
+    all_vars = {}
+    all_vars.update(self.vars)
+    all_vars.update(vars)
+    for key in all_vars:
+      if type(self.vars[key]) == str:
+        query = query.replace("${" + key + "}", self.vars[key])
 #    print("Making query", query)
     if not self.session:
       print("Creating session", file=sys.stderr)
@@ -43,7 +49,7 @@ class Api:
       r = self.session.post(self.endpoint)
       csrf_token = r.cookies.get_dict().get('csrftoken')
       self.headers.update({"X-CsrfToken": csrf_token})
-    r = self.session.post(self.endpoint, json={"query": query}, headers=self.headers)
+    r = self.session.post(self.endpoint, json={"query": query, "variables": all_vars}, headers=self.headers)
     csrf_token = r.cookies.get_dict().get('csrftoken')
     if csrf_token:
       self.headers.update({"X-CsrfToken": csrf_token})
@@ -93,9 +99,16 @@ class Api:
 
 
 if __name__ == "__main__":
-  print("Running test")
+  print("Running connection test")
   api = Api()
 
+  print("Health check (no password needed)")
+  query = """query MyQuery {
+    healthCheck
+  }"""
+  print(api.query(query))
+
+  print("Trying to login")
   api.login()
 
   print(api.me())
@@ -109,5 +122,4 @@ if __name__ == "__main__":
       }
     }
   }"""
-
   print(api.query(query))
