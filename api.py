@@ -23,6 +23,15 @@ def tsv_row(row, fields):
 def tsv_header(fields):
   return "\t".join(fields)
 
+def csv_escape(s):
+  return '"' + s.replace('"', '""') + '"'
+
+def csv_row(row, fields):
+  return ",".join([csv_escape(sanitize(dotted_field(row,field))) for field in fields])
+
+def csv_header(fields):
+  return ",".join([csv_escape(field) for field in fields])
+
 class Api:
   def __init__(self, vars={}):
     self.session = None

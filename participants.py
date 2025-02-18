@@ -1,4 +1,4 @@
-from api import Api, tsv_header, tsv_row, sanitize
+from api import Api, csv_header, csv_row, sanitize
 
 query = """
 query ParticipantResultsTable($contestId: Int, $venueId: Int, $competingVenueId: Int, $schoolId: Int, $after: String, $filter: ParticipantFilter, $order: ParticipantOrder) {
@@ -113,15 +113,12 @@ fields = ['id', 'competitor.name', 'competitor.school.externalId', 'competitor.s
 if __name__ == "__main__":
   cursor = None
   hasNextPage = True
-  print(tsv_header(fields))
+  print(csv_header(fields))
   while hasNextPage:
     r = api.query(query,{"after": cursor})
-#    print(r)
     hasNextPage = r["data"]["participants"]["participants"]["pageInfo"]["hasNextPage"]
     cursor = r["data"]["participants"]["participants"]["pageInfo"]["endCursor"]
     edges = r["data"]["participants"]["participants"]["edges"]
     results = [{"id": node["id"], "result": node["result"], "competitor": node["competitor"], "member": node["competitor"]["members"][0]} for node in [edge["node"] for edge in edges]]
     for row in results:
-        #print(row)
-        print(tsv_row(row, fields))
-    # print(edges[0])
+        print(csv_row(row, fields))

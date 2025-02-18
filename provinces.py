@@ -1,4 +1,4 @@
-from api import Api, tsv_header, tsv_row, sanitize
+from api import Api, csv_header, csv_row, sanitize
 
 api = Api()
 api.login()
@@ -28,7 +28,7 @@ fields = [
 
 
 if __name__ == "__main__":
-    print(tsv_header(fields))
+    print(csv_header(fields))
     r = api.query(query)
     zones = r["data"]["zones"]["zones"]
     for zone in zones:

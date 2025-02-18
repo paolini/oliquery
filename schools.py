@@ -1,4 +1,4 @@
-from api import Api, tsv_header, tsv_row
+from api import Api, csv_header, csv_row
 
 api = Api()
 api.login()
@@ -6,47 +6,49 @@ api.login()
 query = """{
     schools {
         schools(after:"$$") {
-        totalCount
-        pageInfo {
-            hasNextPage
-            endCursor
-        }
-        edges {
-            node {
-            email
-            externalId
-            gameOnly
-            globalId
-            id
-            isActive
-            location {
-                address
-                city {
+            totalCount
+            pageInfo {
+                hasNextPage
+                endCursor
+            }
+            edges {
+                node {
+                    email
+                    externalId
+                    gameOnly
+                    globalId
+                    id
+                    isActive
+                    location {
+                        address
+                        city {
+                            name
+                            province {
+                                name
+                            }
+                        }
+                        postalCode
+                        name
+                    }
                     name
-                    province {
+                    numUnverified
+                    parentExternalId
+                    website
+                    type {
                         name
                     }
                 }
-                postalCode
-                name
             }
-            name
-            numUnverified
-            parentExternalId
-            website
-            type
-            }
-        }
         }
     }
-    }"""
+}"""
 
 fields = [
     "id",
     "name",
     "isActive",
     "email",
-    "type",
+    "type.name",
     "externalId",
     "gameOnly",
     "globalId",
@@ -60,16 +62,17 @@ fields = [
     "location.name",
     ]
 
-print(tsv_header(fields))
+print(csv_header(fields))
 cursor = ""
 while True:
     r = api.query(query.replace("$$", cursor))
-
+    if r.get("errors"):
+        raise Exception(r["errors"])
     schools = r["data"]["schools"]["schools"]
     edges = schools["edges"]
     for edge in edges:
         node = edge["node"]
-        print(tsv_row(node, fields))
+        print(csv_row(node, fields))
     cursor = schools["pageInfo"]["endCursor"]
     hasNextPage = schools["pageInfo"]["hasNextPage"]
     if not hasNextPage:
