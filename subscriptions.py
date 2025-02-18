@@ -1,16 +1,10 @@
-import json
-import os
+from api import Api
+from mycsv import sanitize, csv_row, csv_header
 
-from api import Api, sanitize
-
-api=Api()
-api.login()
-
-# grazie a Flavio
-query = """query Prova {
+query = """query Prova($CURSOR: String, $EDITION: String!) {
   olympiads{
-    edition(id:"olimat25") {
-      subscriptions(after: "$CURSOR") {
+    edition(id: $EDITION) {
+      subscriptions(after: $CURSOR) {
         edges {
           node {
             status
@@ -36,33 +30,20 @@ query = """query Prova {
   }
 }"""
 
+api=Api(requireEdition=True)
+api.login()
 cursor = ""
-print("\t".join([
-    "Status", 
-    "IsValid", 
-    "InvalidatedAt", 
-    "Donation", 
-    "ContactID", 
-    "FullName",
-    "IsActive", 
-    "Email"]))
+fields = ["status", "isValid", "invalidatedAt", "donation", "contact.id", "contact.fullName", "contact.isActive", "contact.user.email"]
+print(csv_header(fields))
 while True:
-    r = api.query(query.replace("$CURSOR", cursor))
+    r = api.query(query, {"CURSOR": cursor})
+    if "errors" in r:
+        raise Exception(r["errors"])
     subscriptions = r["data"]["olympiads"]["edition"]["subscriptions"]
     hasNextPage = subscriptions["pageInfo"]["hasNextPage"]
     cursor = subscriptions["pageInfo"]["endCursor"]
     for subscription in subscriptions["edges"]:
         node = subscription["node"]
-        contact = node["contact"]
-        user = contact["user"]
-        print("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(
-            node["status"], 
-            node["isValid"], 
-            sanitize(node["invalidatedAt"]), 
-            sanitize(node["donation"]), 
-            contact["id"], 
-            sanitize(contact["fullName"]),
-            1 if contact["isActive"] else 0, 
-            sanitize(user["email"])))
+        print(csv_row(node, fields))
     if not hasNextPage:
         break

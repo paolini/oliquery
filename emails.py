@@ -1,11 +1,10 @@
-from api import Api, sanitize
+import sys
+from api import Api
+from mycsv import csv_header, csv_row
 
-api = Api({"EDITION": "olimat24"})
-api.login()
-
-r = api.query("""query MyQuery {
+query = """query MyQuery($EDITION: String!, $CURSOR: String) {
   emails {
-    emails(editionId: "olimat25") {
+    emails(editionId:$EDITION,after:$CURSOR) {
       totalCount
       pageInfo {
         hasNextPage
@@ -14,15 +13,28 @@ r = api.query("""query MyQuery {
       edges {
         node {
           subject
+          to
           deliveryStatus
         }
       }
     }
   }
-}""")
-emails = r["data"]["emails"]["emails"]
-edges = emails["edges"]
-count = 0
-for edge in edges:
-    node = edge["node"]
-    print("{}\t{}\t{}".format(count,sanitize(node["subject"]), node["deliveryStatus"]))
+}"""
+
+api=Api(requireEdition=True)
+api.login()
+
+cursor = ""
+
+fields = ["subject", "to", "deliveryStatus"]
+print(csv_header(fields))
+hasNextPage = True
+while hasNextPage:
+    r = api.query(query,{"CURSOR": cursor})
+    if not cursor:
+        print("Total emails: {}".format(r["data"]["emails"]["emails"]["totalCount"]), file=sys.stderr)
+    emails = r["data"]["emails"]["emails"]
+    cursor = emails["pageInfo"]["endCursor"]
+    for email in emails["edges"]:
+        print(csv_row(email["node"], fields))
+    hasNextPage = emails["pageInfo"]["hasNextPage"]

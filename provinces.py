@@ -1,12 +1,13 @@
-from api import Api, csv_header, csv_row, sanitize
+from api import Api
+from mycsv import  csv_header, csv_row
 
-api = Api()
+api = Api(requireEdition=True)
 api.login()
 
-query = """{
+query = """query Zones($EDITION: String!) {
   zones {
     zones(
-      filters: {olympiad: {editions: {id: {exact: "${EDITION}"}}}, 
+      filters: {olympiad: {editions: {id: {exact: $EDITION}}}, 
       provinces: {name: {}}}
     ) {
       id
@@ -26,16 +27,15 @@ fields = [
     "provinces.name",
 ]
 
-
 if __name__ == "__main__":
-    print(csv_header(fields))
     r = api.query(query)
     zones = r["data"]["zones"]["zones"]
+    fields = ["zone.id", "zone.name", "province.name", "province.id"]
+    print(csv_header(fields))
     for zone in zones:
         for province in zone["provinces"]:
-            row = []
-            row.append(sanitize(zone["id"]))
-            row.append(sanitize(zone["name"]))
-            row.append(sanitize(province["name"]))
-            row.append(sanitize(province["id"]))
-            print("\t".join(row))
+            row = {
+                "zone": zone,
+                "province": province,
+            }
+            print(csv_row(row, fields))

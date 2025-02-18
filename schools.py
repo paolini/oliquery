@@ -3,9 +3,10 @@ from api import Api, csv_header, csv_row
 api = Api()
 api.login()
 
-query = """{
+query = """
+query Schools($after: String) {
     schools {
-        schools(after:"$$") {
+        schools(after: $after) {
             totalCount
             pageInfo {
                 hasNextPage
@@ -65,7 +66,7 @@ fields = [
 print(csv_header(fields))
 cursor = ""
 while True:
-    r = api.query(query.replace("$$", cursor))
+    r = api.query(query, {"after": cursor})
     if r.get("errors"):
         raise Exception(r["errors"])
     schools = r["data"]["schools"]["schools"]

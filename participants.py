@@ -1,4 +1,5 @@
-from api import Api, csv_header, csv_row, sanitize
+from api import Api
+from mycsv import csv_header, csv_row
 
 query = """
 query ParticipantResultsTable($contestId: Int, $venueId: Int, $competingVenueId: Int, $schoolId: Int, $after: String, $filter: ParticipantFilter, $order: ParticipantOrder) {

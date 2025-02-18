@@ -1,6 +1,7 @@
-from api import Api, sanitize
+from api import Api
+from mycsv import csv_header, csv_row
 
-query3 = """query {
+query3 = """query CdRd($EDITION: String!) {
   zones {
     zones(filters: {olympiad: {editions: {id: {exact: "${EDITION}"}}}}) {
       name
@@ -22,9 +23,9 @@ query3 = """query {
   }
 }"""
 
-queryCDRD = """query {
+queryCDRD = """query CdRd($EDITION: String!) {
   zones {
-    zones(filters: {olympiad: {editions: {id: {exact: "${EDITION}"}}}}) {
+    zones(filters: {olympiad: {editions: {id: {exact: $EDITION}}}}) {
       name
       admins {
         user {
@@ -52,30 +53,24 @@ queryCDRD = """query {
   }
 }"""
 
-api = Api()
+api = Api(requireEdition=True)
 api.login()
 
-if True:
-  CDRD = api.query(queryCDRD)
-  zones = CDRD["data"]["zones"]["zones"]
-  print("\t".join(["zona", "CD/RD", "nome", "cognome", "email", "telefono", "scuola", "indirizzo", "CAP", "città"]))
-  for z in zones:
-    for a in z["admins"]:
-      riga = [] 
-      riga.append(sanitize(z["name"]))
-      riga.append("CD" if a["isPrimary"] else "RD")
-      user = a["user"]
-      riga.append(sanitize(user["name"]))
-      riga.append(sanitize(user["surname"]))
-      riga.append(sanitize(user["email"]))
-      riga.append(sanitize(user["phoneNumber"]))
-      teachers = user["teachers"]
-      if teachers:
-          scuo = teachers[0]["school"]["location"]
-          riga.append(sanitize(scuo["name"])) 
-          riga.append(sanitize(scuo["address"]))
-          riga.append(sanitize(scuo["postalCode"]))
-          riga.append(sanitize(scuo["city"]["name"]))
-      else:
-          riga.extend(["","","",""])
-      print("\t".join(riga))
+if __name__ == "__main__":
+  data = api.query(queryCDRD)
+  if "errors" in data:
+     raise Exception(data["errors"])
+  zones = data["data"]["zones"]["zones"]
+  fields = ["zone", "isPrimary", "user.name", "user.surname", "user.email", "user.phoneNumber", "school.name", "school.address", "school.postalCode", "school.city.name"]
+  print(csv_header(fields))
+  for zone in zones:
+    for row in zone["admins"]:
+      row["zone"] = zone["name"]
+      teachers = row["user"]["teachers"]
+      if len(teachers) == 1:
+          row["school"] = teachers[0]["school"]["location"]
+      elif len(teachers) > 1:
+          row["school"] = {
+             "name": "<multiple schools>",
+          }
+      print(csv_row(row, fields))
