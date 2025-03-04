@@ -1,3 +1,4 @@
+import sys, os
 from api import Api
 from mycsv import csv_header, csv_row
 
@@ -88,35 +89,43 @@ query ParticipantResultsTable($contestId: Int, $venueId: Int, $competingVenueId:
   }
 }"""
 
+"""
 o = {
     "operationName":"ParticipantResultsTable",
     "variables":{
-        "contestId":14,
+        "contestId": CONTEST_ID,
         "after":None,
         "filter":{},
         "order":{}
         },
     "query": query
 }
-
-variables = {
-    "contestId":14,
-    "after":None,
-    "filter":{},
-    "order":{}
-}
-
-api = Api(variables)
-api.login()
-
-fields = ['id', 'competitor.name', 'competitor.school.externalId', 'competitor.school.name', 'competitor.school.location.city.name', 'competitor.school.location.city.province.id', 'member.name', 'member.surname']
+"""
 
 if __name__ == "__main__":
+  if len(sys.argv) > 1:
+    contestId = int(sys.argv[1])
+  else:
+    contestId = os.environ.get("OLI_CONTEST_ID", 14)
+
+  api = Api()
+  api.login()
+  
+  fields = ['id', 'competitor.name', 'competitor.school.externalId', 'competitor.school.name', 'competitor.school.location.city.name', 'competitor.school.location.city.province.id', 'member.name', 'member.surname']
+
   cursor = None
   hasNextPage = True
+  print(f"Using contestId={contestId}", file=sys.stderr)
   print(csv_header(fields))
   while hasNextPage:
-    r = api.query(query,{"after": cursor})
+    r = api.query(query,{"contestId": contestId, "after": cursor})
+    errors = r.get("errors")
+    if errors:
+        print(errors, file=sys.stderr)
+        exit(1)
+    totalCount = r["data"]["participants"]["participants"]["totalCount"]
+    if cursor is None:
+       print(f"Total count: {totalCount}", file=sys.stderr)
     hasNextPage = r["data"]["participants"]["participants"]["pageInfo"]["hasNextPage"]
     cursor = r["data"]["participants"]["participants"]["pageInfo"]["endCursor"]
     edges = r["data"]["participants"]["participants"]["edges"]
