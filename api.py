@@ -2,6 +2,9 @@ import requests
 import json
 import os
 import sys
+import dotenv
+
+dotenv.load_dotenv()
 
 class Api:
   def __init__(self, requireEdition=False):

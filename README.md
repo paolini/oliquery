@@ -4,10 +4,12 @@ git clone https://github.com/paolini/oliquery.git
 cd oliquery
 ```
 
-Prima di iniziare servono le credenziali:
+Prima di iniziare servono le credenziali. Crea un file `.env`
+con queste righe (inserisci le tue credenziali):
 ```
-export OLI_EMAIL=my-username
-export OLI_PASSWORD=my-secret-password
+OLI_EMAIL=<my@email.com>
+OLI_PASSWORD=<my_secret_password>
+OLI_EDITION=olimat25
 ```
 
 Test di funzionamento del login:
