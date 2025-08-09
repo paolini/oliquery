@@ -1,4 +1,5 @@
-from api import Api, csv_header, csv_row
+from api import Api
+from mycsv import csv_header, csv_row
 
 api = Api()
 api.login()

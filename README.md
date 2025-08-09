@@ -31,3 +31,8 @@ Elenco distretti:
 ```
 python zones.py
 ```
+
+Elenco sottoscrizioni scuole:
+```
+python school_subscriptions.py
+```
