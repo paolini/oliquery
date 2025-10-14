@@ -23,10 +23,6 @@ query = """query Subscriptions($editionId: String!, $after: String, $filter: Sch
             isValid
             status
             donation
-            schoolVenue {
-              id
-              name
-            }
             school {
               id
               externalId
@@ -93,7 +89,6 @@ if __name__ == "__main__":
     api.login()
     
     fields = [
-        "venue_id", "venue_name",
         "school_id", "school_external_id", "school_name", "school_type", "school_email", 
         "school_is_active", "school_game_only", "address", "postal_code", 
         "city_id", "city_name", "province_id", "province_name", "region_name",
@@ -141,17 +136,8 @@ if __name__ == "__main__":
             school_type = school['type']
             user = contact['user'] if contact else None
 
-            # Gestione schoolVenue come lista
-            school_venue = node['schoolVenue']
-            if school_venue:
-                [venue] = school_venue  # solleva ValueError se la lista ha != 1 elemento
-            else:
-                venue = None
-            
             # Create a flat row object for csv_row function with all available data
             row_data = {
-                'venue_id': venue['id'] if venue else None,
-                'venue_name': venue['name'] if venue else None,
                 'school_id': school['id'],
                 'school_external_id': school['externalId'],
                 'school_name': school['name'],
