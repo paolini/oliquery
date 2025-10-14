@@ -34,5 +34,5 @@ python zones.py
 
 Elenco sottoscrizioni scuole:
 ```
-python school_subscriptions.py
+python school_subscriptions.py olimat25
 ```

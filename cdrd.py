@@ -23,6 +23,8 @@ query3 = """query CdRd($EDITION: String!) {
   }
 }"""
 
+# TODO: Non usare zones/zones ma venues/venues
+
 queryCDRD = """query CdRd($EDITION: String!) {
   zones {
     zones(filters: {olympiad: {editions: {id: {exact: $EDITION}}}}) {
