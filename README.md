@@ -10,7 +10,9 @@ con queste righe (inserisci le tue credenziali):
 OLI_EMAIL=<my@email.com>
 OLI_PASSWORD=<my_secret_password>
 OLI_EDITION=olimat25
+OLI_GRAPHQL_ENDPOINT=https://olimpiadi-scientifiche.it/graphql/
 ```
+
 
 Test di funzionamento del login:
 ```
