@@ -9,7 +9,8 @@ dotenv.load_dotenv()
 class Api:
   def __init__(self, requireEdition=False):
     self.session = None
-    self.endpoint = "https://olimpiadi-scientifiche.it/graphql/"
+    self.endpoint = os.environ.get("OLI_GRAPHQL_ENDPOINT") or "https://olimpiadi-scientifiche.it/graphql/"
+    print("Using endpoint:", self.endpoint, file=sys.stderr)
     self.headers = {}
 
     self.EMAIL = os.environ.get("OLI_EMAIL")
