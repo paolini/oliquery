@@ -32,7 +32,7 @@ if __name__ == "__main__":
         print(f"Usage: {sys.argv[0]} CONTEST_ID")
         sys.exit(1)
     CONTEST_ID = int(sys.argv[1])
-    api = Api(requireEdition=True)
+    api = Api()
     api.login()
     try:
         r = api.query(query, {"CONTEST_ID": CONTEST_ID})
