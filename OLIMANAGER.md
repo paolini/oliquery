@@ -361,6 +361,86 @@ query {
 }
 ```
 
+### Mutation Importanti
+
+#### `participants.matchOrCreateParticipant`
+
+Questa mutation permette di trovare o creare un partecipante (participant) per un contest di tipo scolastico, cercando di abbinare automaticamente i dati forniti a un competitor esistente.
+
+**Parametri:**
+- `contestId` (Int!) - ID del contest
+- `schoolExternalId` (String!) - Codice ministeriale della scuola
+- `name` (String!) - Nome del partecipante
+- `surname` (String!) - Cognome del partecipante
+- `classYear` (Int!) - Anno di corso (1-13)
+- `section` (String!) - Sezione (es: "A", "B")
+- `birthDate` (Date) - Data di nascita (opzionale)
+
+**Restrizioni:**
+- Funziona solo per olimpiadi individuali (`competitor_kind == STUDENT`)
+- Funziona solo per contest di tipo scolastico (`scope == SCHOOL`)
+- L'anno di corso deve essere valido per il tipo di scuola (1-5 elementari, 6-8 medie, 9-13 superiori)
+
+**Logica di matching:**
+
+La mutation cerca un `CompetitorMember` esistente che corrisponda ai seguenti criteri:
+1. Stessa edizione e scuola
+2. Stesso anno di corso (`class_year`)
+3. Nome e cognome corrispondenti (ignora maiuscole/minuscole e accenti, permette inversione nome/cognome)
+4. Se `birthDate` è fornita: la sezione O la data di nascita devono corrispondere
+5. Se `birthDate` non è fornita: la sezione deve corrispondere
+6. La sezione può anche essere preceduta dall'anno di corso (es: "3A" matcha con sezione "A" e anno 3)
+
+Se viene trovato un competitor esistente, viene usato quello (priorità a chi ha effettuato login più recentemente).
+Se non viene trovato, viene creato un nuovo competitor e un nuovo member.
+
+In entrambi i casi, viene creato un participant se non esiste già per quel contest.
+
+**Risposta:**
+```graphql
+type ParticipantMatchSuccess {
+  participant: ParticipantType!
+  competitorCreated: Boolean!      # true se è stato creato un nuovo competitor
+  participantCreated: Boolean!     # true se è stato creato un nuovo participant
+  multipleCompetitorsMatched: Boolean!  # true se più competitor corrispondono ai criteri
+}
+```
+
+**Esempio:**
+```graphql
+mutation {
+  participants {
+    matchOrCreateParticipant(
+      contestId: 123
+      schoolExternalId: "RMPC01000A"
+      name: "Mario"
+      surname: "Rossi"
+      classYear: 10
+      section: "A"
+      birthDate: "2008-05-15"
+    ) {
+      participant {
+        id
+        competitor {
+          id
+          name
+        }
+      }
+      competitorCreated
+      participantCreated
+      multipleCompetitorsMatched
+    }
+  }
+}
+```
+
+**Caso d'uso:**
+
+Questa mutation è particolarmente utile per:
+- Importare liste di partecipanti da fonti esterne
+- Registrare automaticamente partecipanti a contest scolastici
+- Evitare duplicati cercando di abbinare i dati a competitor già esistenti
+
 ---
 
 ## Autenticazione
