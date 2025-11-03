@@ -63,3 +63,35 @@ python merge_schools_coordinators.py school_subscriptions_25.csv venues_14.csv >
 ```
 
 Importa l'ultimo file ottenuto su olifogli.
+
+# Importazione partecipanti (match_or_create_participant)
+
+Crea/trova partecipanti per contest scolastici usando la mutation `matchOrCreateParticipant`:
+
+**Singolo partecipante:**
+```bash
+python match_create_participant.py \
+    --contest-id 1 \
+    --school-code BIPS01000N \
+    --name Mario --surname Rossi \
+    --class-year 10 --section A \
+    --birth-date 2008-05-15 \
+    --format csv
+```
+
+**Batch da CSV:**
+```bash
+python match_create_participant_batch.py \
+    --contest-id 1 \
+    --input partecipanti.csv \
+    --output-format csv > risultati.csv
+```
+
+Il file CSV di input deve avere le colonne: `name`, `surname`, `class_year`, `section`, `school_code`, `birth_date` (opzionale). Se presenti le colonne `id` o `_id` vengono riportate nell'output.
+
+Output: CSV con `participant_id` (ID del participant creato/trovato) e stato dell'operazione.
+
+Performance: ~220ms per riga (100 righe in ~22 secondi).
+
+Vedi [MATCH_PARTICIPANT_README.md](MATCH_PARTICIPANT_README.md) per dettagli completi.
+````
