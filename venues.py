@@ -58,6 +58,7 @@ if __name__ == "__main__":
     
     # Per ogni venue, gestisci la paginazione delle subscriptions
     for venue in venues:
+        print(f"Processing venue {venue['id']}: {venue['name']}", file=sys.stderr )
         venue_id = venue["id"]
         venue_name = venue["name"]
         admins = venue["admins"]

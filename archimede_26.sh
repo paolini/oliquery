@@ -5,7 +5,7 @@ set -e
 set -u
 
 export OLI_EDITION=olimat26
-CONTEST_ID=27
+CONTEST_ID=27 # contest febbraio 2026
 
 echo "OLI_EDITION=${OLI_EDITION}"
 echo "CONTEST_ID=${CONTEST_ID}"
